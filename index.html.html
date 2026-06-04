@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>WhyNot? — Reality Check Engine</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1a1a24;
+    --border: #2a2a3a;
+    --purple: #9333ea;
+    --purple-light: #a855f7;
+    --purple-dim: #1e0a3c;
+    --red: #ef4444;
+    --red-dim: #2d0a0a;
+    --green: #22c55e;
+    --green-dim: #052e16;
+    --text: #e8e8f4;
+    --muted: #6b7280;
+    --subtle: #9ca3af;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 32px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(10,10,15,0.92);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; }
+  .nav-logo span { color: var(--purple-light); }
+  .nav-tag {
+    font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--muted);
+    border: 1px solid var(--border); padding: 4px 10px; border-radius: 100px;
+  }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, #1e0a3c44, transparent);
+  }
+  .hero-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--purple-light);
+    background: var(--purple-dim); border: 1px solid #4a1a8a;
+    padding: 5px 14px; border-radius: 100px; margin-bottom: 24px;
+  }
+  .hero h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 900; line-height: 1.1; letter-spacing: -1.5px;
+    margin-bottom: 16px;
+  }
+  .hero h1 em { color: var(--purple-light); font-style: normal; }
+  .hero p {
+    font-size: 1.1rem; color: var(--subtle); max-width: 520px;
+    margin: 0 auto 40px; line-height: 1.7;
+  }
+
+  /* EXAMPLES */
+  .examples {
+    display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .example-chip {
+    font-size: 0.82rem; color: var(--subtle);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 7px 14px; border-radius: 100px; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .example-chip:hover { border-color: var(--purple); color: var(--text); }
+
+  /* FORM */
+  .form-wrap {
+    max-width: 680px; margin: 0 auto; padding: 0 24px;
+  }
+  .input-box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px; padding: 20px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .input-box:focus-within { border-color: var(--purple); }
+  .input-box textarea {
+    width: 100%; background: transparent; border: none; outline: none;
+    color: var(--text); font-size: 1rem; font-family: inherit;
+    resize: none; min-height: 100px; line-height: 1.6;
+  }
+  .input-box textarea::placeholder { color: var(--muted); }
+  .input-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);
+  }
+  .char-count { font-size: 0.78rem; color: var(--muted); }
+  .submit-btn {
+    background: var(--purple); color: #fff;
+    border: none; border-radius: 10px;
+    padding: 12px 28px; font-size: 0.95rem; font-weight: 700;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .submit-btn:hover:not(:disabled) { background: #7c22d4; transform: translateY(-1px); }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* LOADING */
+  .loading-wrap {
+    max-width: 680px; margin: 32px auto 0; padding: 0 24px;
+    display: none;
+  }
+  .loading-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; text-align: center;
+  }
+  .spinner {
+    width: 40px; height: 40px; border: 3px solid var(--border);
+    border-top-color: var(--purple-light); border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: var(--subtle); font-size: 0.95rem; }
+  .loading-sub { color: var(--muted); font-size: 0.82rem; margin-top: 6px; }
+
+  /* RESULT */
+  .result-wrap {
+    max-width: 680px; margin: 32px auto 80px; padding: 0 24px;
+    display: none;
+  }
+
+  .result-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    gap: 16px; margin-bottom: 24px; flex-wrap: wrap;
+  }
+  .result-idea {
+    font-size: 0.8rem; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 1px; margin-bottom: 6px;
+  }
+  .result-title { font-size: 1.2rem; font-weight: 700; color: var(--text); }
+
+  .verdict-badge {
+    flex-shrink: 0; padding: 8px 18px; border-radius: 100px;
+    font-size: 0.78rem; font-weight: 800; letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .badge-risky { background: var(--red-dim); color: #f87171; border: 1px solid var(--red); }
+  .badge-possible { background: #1c1a05; color: #facc15; border: 1px solid #ca8a04; }
+  .badge-solid { background: var(--green-dim); color: #4ade80; border: 1px solid var(--green); }
+
+  .section-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 24px; margin-bottom: 16px;
+  }
+  .section-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: 16px;
+  }
+  .label-red { color: #f87171; }
+  .label-green { color: #4ade80; }
+  .label-purple { color: var(--purple-light); }
+
+  .point {
+    display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;
+  }
+  .point:last-child { margin-bottom: 0; }
+  .point-num {
+    flex-shrink: 0; width: 24px; height: 24px;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 0.72rem; font-weight: 800;
+  }
+  .num-red { background: var(--red-dim); color: #f87171; border: 1px solid #7f1d1d; }
+  .num-green { background: var(--green-dim); color: #4ade80; border: 1px solid #14532d; }
+  .num-purple { background: var(--purple-dim); color: var(--purple-light); border: 1px solid #4a1a8a; }
+  .point-text { font-size: 0.92rem; color: #c8c8e0; line-height: 1.65; padding-top: 3px; }
+  .point-text strong { color: var(--text); font-weight: 700; }
+
+  .bottom-line {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-left: 3px solid var(--purple);
+    border-radius: 12px; padding: 18px 20px;
+    font-size: 0.92rem; color: var(--subtle); line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .bottom-line strong { color: var(--text); }
+
+  .action-row {
+    display: flex; gap: 10px; flex-wrap: wrap;
+  }
+  .action-btn {
+    flex: 1; min-width: 140px;
+    padding: 12px 20px; border-radius: 10px; border: none;
+    font-size: 0.88rem; font-weight: 700; cursor: pointer;
+    font-family: inherit; transition: all 0.15s;
+  }
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-primary:hover { background: #7c22d4; }
+  .btn-secondary { background: var(--surface2); color: var(--subtle); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--purple); color: var(--text); }
+
+  /* ERROR */
+  .error-card {
+    background: var(--red-dim); border: 1px solid #7f1d1d;
+    border-radius: 12px; padding: 16px 20px;
+    color: #fca5a5; font-size: 0.9rem; display: none; margin-top: 12px;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center; padding: 32px;
+    border-top: 1px solid var(--border);
+    color: var(--muted); font-size: 0.8rem;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Why<span>Not</span>?</div>
+  <div class="nav-tag">POC v0.1</div>
+</nav>
+
+<section class="hero">
+  <div class="hero-eyebrow">Reality Check Engine</div>
+  <h1>Your idea deserves<br/><em>brutal honesty.</em></h1>
+  <p>Tell us your idea, decision, or doubt. We'll tell you exactly why it could fail — and exactly how to make it work anyway.</p>
+
+  <div class="examples">
+    <div class="example-chip" onclick="fillExample('I want to quit my job and start a food delivery startup')">Quit job → startup</div>
+    <div class="example-chip" onclick="fillExample('I want to drop out of college to become a full-time YouTuber')">Drop out → YouTube</div>
+    <div class="example-chip" onclick="fillExample('I want to invest all my savings in crypto')">All savings → crypto</div>
+    <div class="example-chip" onclick="fillExample('I want to move to a new city alone with no job lined up')">Relocate with no job</div>
+    <div class="example-chip" onclick="fillExample('I want to start a clothing brand with no experience')">Clothing brand</div>
+  </div>
+</section>
+
+<div class="form-wrap">
+  <div class="input-box">
+    <textarea id="ideaInput" placeholder="Type your idea, decision, or doubt here... Be specific. The more detail you give, the sharper the analysis." maxlength="800" oninput="updateChar()"></textarea>
+    <div class="input-footer">
+      <span class="char-count"><span id="charCount">0</span> / 800</span>
+      <button class="submit-btn" id="submitBtn" onclick="analyze()" disabled>
+        <span>Analyze It</span>
+        <span>→</span>
+      </button>
+    </div>
+  </div>
+  <div class="error-card" id="errorCard"></div>
+</div>
+
+<div class="loading-wrap" id="loadingWrap">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Cutting through the optimism bias...</div>
+    <div class="loading-sub">No sugarcoating. Give us a moment.</div>
+  </div>
+</div>
+
+<div class="result-wrap" id="resultWrap"></div>
+
+<footer>WhyNot? · POC v0.1 · Built to validate the idea</footer>
+
+<script>
+const loadingMessages = [
+  "Cutting through the optimism bias...",
+  "Finding the real risks you haven't thought of...",
+  "Building your reality check...",
+  "No sugarcoating in progress...",
+  "Stress-testing your thinking..."
+];
+
+function updateChar() {
+  const val = document.getElementById('ideaInput').value;
+  document.getElementById('charCount').textContent = val.length;
+  document.getElementById('submitBtn').disabled = val.trim().length < 15;
+}
+
+function fillExample(text) {
+  const ta = document.getElementById('ideaInput');
+  ta.value = text;
+  updateChar();
+  ta.focus();
+}
+
+let loadingInterval;
+
+function setLoading(on) {
+  document.getElementById('loadingWrap').style.display = on ? 'block' : 'none';
+  document.getElementById('submitBtn').disabled = on;
+  if (on) {
+    let i = 0;
+    document.getElementById('loadingText').textContent = loadingMessages[0];
+    loadingInterval = setInterval(() => {
+      i = (i + 1) % loadingMessages.length;
+      document.getElementById('loadingText').textContent = loadingMessages[i];
+    }, 1800);
+  } else {
+    clearInterval(loadingInterval);
+  }
+}
+
+async function analyze() {
+  const idea = document.getElementById('ideaInput').value.trim();
+  if (!idea || idea.length < 15) return;
+
+  document.getElementById('errorCard').style.display = 'none';
+  document.getElementById('resultWrap').style.display = 'none';
+  setLoading(true);
+
+  const systemPrompt = `You are WhyNot? — a brutally honest, direct reality-check engine. You don't coddle people. You respect them enough to tell the truth.
+
+Your job when someone gives you an idea, decision, or doubt:
+1. Give them the REAL reasons why it could fail or why they shouldn't do it (not generic warnings — specific, insightful, hard-hitting)
+2. Give them a clear action path to turn each "Why Not" into a "Why Yes"
+3. Give a bottom line verdict
+
+Respond ONLY in this exact JSON format, nothing else:
+{
+  "verdict": "RISKY" | "POSSIBLE" | "SOLID",
+  "verdict_reason": "One sharp sentence explaining the verdict",
+  "why_nots": [
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation of this specific risk or problem"},
+    {"title": "Short title", "detail": "..."},
+    {"title": "Short title", "detail": "..."}
+  ],
+  "why_yes": [
+    {"title": "Short action title", "detail": "2-3 sentence specific, actionable step to overcome the corresponding why_not"},
+    {"title": "Short action title", "detail": "..."},
+    {"title": "Short action title", "detail": "..."}
+  ],
+  "bottom_line": "2-3 sentences. Brutally honest summary. What should they actually do? Be direct, not diplomatic.",
+  "first_step": "The single most important thing they should do in the next 7 days. Specific and actionable."
+}
+
+Be specific to their exact idea — not generic. No fluff. No motivational nonsense. Real talk only.`;
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: "user", content: idea }]
+      })
+    });
+
+    const data = await response.json();
+    setLoading(false);
+
+    if (!response.ok || !data.content) {
+      throw new Error(data.error?.message || "API error");
+    }
+
+    const raw = data.content.map(b => b.text || '').join('');
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    renderResult(idea, result);
+
+  } catch (err) {
+    setLoading(false);
+    const errEl = document.getElementById('errorCard');
+    errEl.textContent = "Something went wrong: " + err.message + ". Try again in a moment.";
+    errEl.style.display = 'block';
+  }
+}
+
+function renderResult(idea, r) {
+  const badgeClass = r.verdict === 'RISKY' ? 'badge-risky' : r.verdict === 'SOLID' ? 'badge-solid' : 'badge-possible';
+  const badgeText = r.verdict === 'RISKY' ? '⚠️ Risky' : r.verdict === 'SOLID' ? '✅ Solid' : '🤔 Possible';
+
+  const whyNotsHTML = r.why_nots.map((w, i) => `
+    <div class="point">
+      <div class="point-num num-red">${i+1}</div>
+      <div class="point-text"><strong>${w.title}</strong><br/>${w.detail}</div>
+    </div>
+  `).join('');
+
+  const whyYesHTML = r.why_yes.map((w, i) => `
+    <div class="point">
+      <div class="point-num num-green">${i+1}</div>
+      <div class="point-text"><strong>${w.title}</strong><br/>${w.detail}</div>
+    </div>
+  `).join('');
+
+  const wrap = document.getElementById('resultWrap');
+  wrap.innerHTML = `
+    <div class="result-header">
+      <div>
+        <div class="result-idea">Your submission</div>
+        <div class="result-title">"${idea.length > 80 ? idea.slice(0,80)+'...' : idea}"</div>
+      </div>
+      <div class="verdict-badge ${badgeClass}">${badgeText}</div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-label label-red">🚫 Why Not — The Real Problems</div>
+      ${whyNotsHTML}
+    </div>
+
+    <div class="section-card">
+      <div class="section-label label-green">✅ Why Yes — How to Actually Make It Work</div>
+      ${whyYesHTML}
+    </div>
+
+    <div class="bottom-line">
+      <strong>Bottom Line:</strong> ${r.bottom_line}
+    </div>
+
+    <div class="section-card">
+      <div class="section-label label-purple">⚡ Your First Step This Week</div>
+      <div class="point">
+        <div class="point-num num-purple">→</div>
+        <div class="point-text">${r.first_step}</div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="action-btn btn-primary" onclick="shareResult()">Share This Analysis</button>
+      <button class="action-btn btn-secondary" onclick="resetForm()">Analyze Another Idea</button>
+    </div>
+  `;
+
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function shareResult() {
+  const idea = document.getElementById('ideaInput').value.trim();
+  const text = `Got a brutal reality check on my idea from WhyNot? ✅\n\nMy idea: "${idea}"\n\nCheck yours at WhyNot?`;
+  if (navigator.share) {
+    navigator.share({ title: 'WhyNot? Analysis', text });
+  } else {
+    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+  }
+}
+
+function resetForm() {
+  document.getElementById('ideaInput').value = '';
+  document.getElementById('charCount').textContent = '0';
+  document.getElementById('submitBtn').disabled = true;
+  document.getElementById('resultWrap').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+</body>
+</html>
