@@ -360,19 +360,20 @@ Respond ONLY in this exact JSON format, nothing else:
 Be specific to their exact idea — not generic. No fluff. No motivational nonsense. Real talk only.`;
 
   try {
-        const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "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"
-      },
-      body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: idea }
-        ]
-      })
-    })
+     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+  method: "POST",   // ← this line is missing
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "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"
+  },
+  body: JSON.stringify({
+    model: "llama-3.3-70b-versatile",
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: idea }
+    ]
+  })
+});
 
     const data = await response.json();
     setLoading(false);
