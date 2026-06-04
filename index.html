@@ -364,7 +364,7 @@ Be specific to their exact idea — not generic. No fluff. No motivational nonse
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer gsk_xxxx"
+        "Authorization": "Bearer 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"
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
@@ -376,38 +376,13 @@ Be specific to their exact idea — not generic. No fluff. No motivational nonse
     });
 
     const data = await response.json();
-    console.log("Full response:", data);        // ← ADD THIS
-    console.log("Status:", response.status);    // ← ADD THIS
     setLoading(false);
 
     if (!response.ok) {
-      console.log("Error body:", data);         // ← ADD THIS
       throw new Error(data.error?.message || "API error");
     }
 
     const raw = data.choices[0].message.content;
-    console.log("Raw text:", raw);              // ← ADD THIS
-
-    const clean = raw.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
-    renderResult(idea, result);
-
-  } catch (err) {
-    setLoading(false);
-    console.error("Caught error:", err);        // ← ADD THIS
-    const errEl = document.getElementById('errorCard');
-    errEl.textContent = "Something went wrong: " + err.message;
-    errEl.style.display = 'block';
-  }
-
-    const data = await response.json();
-    setLoading(false);
-
-    if (!response.ok || !data.content) {
-      throw new Error(data.error?.message || "API error");
-    }
-
-    const raw = data.content.map(b => b.text || '').join('');
     const clean = raw.replace(/```json|```/g, '').trim();
     const result = JSON.parse(clean);
     renderResult(idea, result);
