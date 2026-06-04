@@ -357,14 +357,14 @@ Respond ONLY in this exact JSON format, nothing else:
   "first_step": "The single most important thing they should do in the next 7 days. Specific and actionable."
 }
 
-Be specific to their exact idea — not generic. No fluff. No motivational nonsense. Real talk only.`;
+Be specific to their exact idea — not generic. No fluff. No motivational nonsense. Real talk only. CRITICAL: Return ONLY the raw JSON object, no markdown or code fences, no explanation. Never use apostrophes inside string values — rephrase to avoid them.`;
 
   try {
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer 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"
+        "Authorization": "Bearer gsk_xxxx"
       },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
@@ -383,7 +383,17 @@ Be specific to their exact idea — not generic. No fluff. No motivational nonse
     }
 
     const raw = data.choices[0].message.content;
-    const clean = raw.replace(/```json|```/g, '').trim();
+    // Strip markdown code fences
+    let clean = raw.replace(/```json\s*/gi, '').replace(/```/g, '').trim();
+    // Extract just the JSON object in case there's text around it
+    const jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error("No JSON found in response");
+    clean = jsonMatch[0];
+    // Fix common LLM JSON issues: replace smart quotes, strip control chars
+    clean = clean
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\x00-\x09\x0b\x0c\x0e-\x1f]/g, ' ');
     const result = JSON.parse(clean);
     renderResult(idea, result);
 
