@@ -208,6 +208,21 @@
     border-top: 1px solid var(--border);
     color: var(--muted); font-size: 0.8rem;
   }
+
+  .tally-wrap {
+    margin-top: 16px; padding: 20px 24px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; display: flex; align-items: center;
+    justify-content: space-between; gap: 16px; flex-wrap: wrap;
+  }
+  .tally-label { font-size: 0.88rem; color: var(--subtle); }
+  .tally-btn {
+    background: transparent; color: var(--purple-light);
+    border: 1px solid var(--purple); border-radius: 8px;
+    padding: 8px 18px; font-size: 0.85rem; font-weight: 700;
+    text-decoration: none; transition: all 0.15s; white-space: nowrap;
+  }
+  .tally-btn:hover { background: var(--purple); color: #fff; }
 </style>
 </head>
 <body>
@@ -305,31 +320,24 @@ function setLoading(on) {
 
 const systemPrompt = `You are WhyNot? — a brutally honest, direct reality-check engine. You do not coddle people. You respect them enough to tell the truth.
 
-Your job when someone gives you an idea, decision, or doubt:
-1. Give them the REAL reasons why it could fail or why they should not do it (not generic warnings — specific, insightful, hard-hitting)
-2. Give them a clear action path to turn each Why Not into a Why Yes
-3. Give a bottom line verdict
+Your job: when someone gives you an idea, decision, or doubt, give them the REAL reasons why it could fail or why they should not do it. Not generic warnings. Specific, insightful, hard-hitting truths they have not considered.
 
 Respond ONLY in this exact JSON format, nothing else:
 {
-  "verdict": "RISKY" | "POSSIBLE" | "SOLID",
+  "verdict": "RISKY" or "POSSIBLE" or "SOLID",
   "verdict_reason": "One sharp sentence explaining the verdict",
   "why_nots": [
-    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation of this specific risk or problem"},
-    {"title": "Short title", "detail": "..."},
-    {"title": "Short title", "detail": "..."}
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation of this specific risk"},
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"}
   ],
-  "why_yes": [
-    {"title": "Short action title", "detail": "2-3 sentence specific, actionable step to overcome the corresponding why_not"},
-    {"title": "Short action title", "detail": "..."},
-    {"title": "Short action title", "detail": "..."}
-  ],
-  "bottom_line": "2-3 sentences. Brutally honest summary. What should they actually do? Be direct, not diplomatic.",
-  "first_step": "The single most important thing they should do in the next 7 days. Specific and actionable."
+  "bottom_line": "2-3 sentences. Brutally honest summary. Be direct, not diplomatic."
 }
 
-Be specific to their exact idea — not generic. No fluff. No motivational nonsense. Real talk only.
-CRITICAL: Return ONLY the raw JSON object. No markdown, no code fences, no text before or after. Never use apostrophes inside string values — rephrase to avoid them.`;
+Rules: Give exactly 5 why_nots. Be specific to their exact idea. No fluff. No silver linings.
+CRITICAL: Return ONLY the raw JSON object. No markdown, no code fences, no text before or after. Never use apostrophes inside string values, rephrase to avoid them.`;
 
 async function analyze() {
   const idea = document.getElementById('ideaInput').value.trim();
@@ -389,12 +397,6 @@ function renderResult(idea, r) {
       <div class="point-text"><strong>${w.title}</strong><br/>${w.detail}</div>
     </div>`).join('');
 
-  const whyYesHTML = r.why_yes.map((w, i) => `
-    <div class="point">
-      <div class="point-num num-green">${i + 1}</div>
-      <div class="point-text"><strong>${w.title}</strong><br/>${w.detail}</div>
-    </div>`).join('');
-
   const wrap = document.getElementById('resultWrap');
   wrap.innerHTML = `
     <div class="result-header">
@@ -408,23 +410,16 @@ function renderResult(idea, r) {
       <div class="section-label label-red">🚫 Why Not — The Real Problems</div>
       ${whyNotsHTML}
     </div>
-    <div class="section-card">
-      <div class="section-label label-green">✅ Why Yes — How to Actually Make It Work</div>
-      ${whyYesHTML}
-    </div>
     <div class="bottom-line">
       <strong>Bottom Line:</strong> ${r.bottom_line}
-    </div>
-    <div class="section-card">
-      <div class="section-label label-purple">⚡ Your First Step This Week</div>
-      <div class="point">
-        <div class="point-num num-purple">→</div>
-        <div class="point-text">${r.first_step}</div>
-      </div>
     </div>
     <div class="action-row">
       <button class="action-btn btn-primary"   onclick="shareResult()">Share This Analysis</button>
       <button class="action-btn btn-secondary" onclick="resetForm()">Analyze Another Idea</button>
+    </div>
+    <div class="tally-wrap">
+      <p class="tally-label">Help us improve — share your feedback</p>
+      <a href="https://tally.so/r/Ek6qqo" target="_blank" class="tally-btn">Give Feedback →</a>
     </div>`;
 
   wrap.style.display = 'block';
