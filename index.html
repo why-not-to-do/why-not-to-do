@@ -16,6 +16,25 @@
 
 <style>
   :root {
+    --bg: #ffffff;
+    --surface: #f8f7ff;
+    --surface2: #f0eeff;
+    --border: #e2dff5;
+    --purple: #7c22d4;
+    --purple-light: #9333ea;
+    --purple-dim: #ede9ff;
+    --red: #dc2626;
+    --red-dim: #fff1f1;
+    --green: #16a34a;
+    --green-dim: #f0fdf4;
+    --text: #1a1030;
+    --muted: #7c6fa0;
+    --subtle: #5b5080;
+    --nav-bg: rgba(255,255,255,0.92);
+    --shadow: 0 1px 3px rgba(120,80,200,0.08);
+  }
+
+  [data-theme="dark"] {
     --bg: #0a0a0f;
     --surface: #13131a;
     --surface2: #1a1a24;
@@ -30,7 +49,32 @@
     --text: #e8e8f4;
     --muted: #6b7280;
     --subtle: #9ca3af;
+    --nav-bg: rgba(10,10,15,0.92);
+    --shadow: none;
   }
+
+  /* Light theme overrides for hardcoded colors */
+  [data-theme="dark"] .num-red    { color: #f87171; border-color: #7f1d1d; }
+  [data-theme="dark"] .num-green  { color: #4ade80; border-color: #14532d; }
+  [data-theme="dark"] .num-purple { color: #a855f7; border-color: #4a1a8a; }
+  [data-theme="dark"] .point-text { color: #c8c8e0; }
+  [data-theme="dark"] .badge-risky  { color: #f87171; border-color: #ef4444; }
+  [data-theme="dark"] .badge-possible { background: #1c1a05; color: #facc15; border-color: #ca8a04; }
+  [data-theme="dark"] .badge-solid  { color: #4ade80; border-color: #22c55e; }
+  [data-theme="dark"] .label-red  { color: #f87171; }
+  [data-theme="dark"] .label-green { color: #4ade80; }
+  [data-theme="dark"] .hero { background: radial-gradient(ellipse 70% 40% at 50% 0%, var(--purple-dim), transparent); }
+  [data-theme="dark"] .hero-eyebrow { background: #1e0a3c; border-color: #4a1a8a; }
+
+  /* Theme toggle button */
+  .theme-toggle {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 100px; padding: 6px 14px;
+    cursor: pointer; font-size: 0.82rem; font-weight: 600;
+    color: var(--subtle); display: flex; align-items: center; gap: 6px;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .theme-toggle:hover { border-color: var(--purple); color: var(--text); }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -46,7 +90,7 @@
     padding: 18px 32px;
     border-bottom: 1px solid var(--border);
     position: sticky; top: 0; z-index: 10;
-    background: rgba(10,10,15,0.92);
+    background: var(--nav-bg);
     backdrop-filter: blur(12px);
   }
   .nav-logo { font-size: 1.4rem; font-weight: 900; letter-spacing: -0.5px; }
@@ -60,7 +104,7 @@
   .hero {
     text-align: center;
     padding: 80px 24px 60px;
-    background: radial-gradient(ellipse 70% 40% at 50% 0%, #1e0a3c44, transparent);
+    background: radial-gradient(ellipse 70% 40% at 50% 0%, var(--purple-dim), transparent);
   }
   .hero-eyebrow {
     display: inline-block;
@@ -147,22 +191,23 @@
     flex-shrink: 0; padding: 8px 18px; border-radius: 100px;
     font-size: 0.78rem; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
   }
-  .badge-risky  { background: var(--red-dim);  color: #f87171; border: 1px solid var(--red); }
-  .badge-possible { background: #1c1a05; color: #facc15; border: 1px solid #ca8a04; }
-  .badge-solid  { background: var(--green-dim); color: #4ade80; border: 1px solid var(--green); }
+  .badge-risky  { background: var(--red-dim);  color: var(--red); border: 1px solid var(--red); }
+  .badge-possible { background: #fefce8; color: #854d0e; border: 1px solid #ca8a04; }
+  .badge-solid  { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
 
   .section-card {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: 16px; padding: 24px; margin-bottom: 16px;
+    box-shadow: var(--shadow);
   }
   .section-label {
     display: flex; align-items: center; gap: 8px;
     font-size: 0.72rem; font-weight: 700; letter-spacing: 2px;
     text-transform: uppercase; margin-bottom: 16px;
   }
-  .label-red { color: #f87171; }
-  .label-green { color: #4ade80; }
-  .label-purple { color: var(--purple-light); }
+  .label-red { color: var(--red); }
+  .label-green { color: var(--green); }
+  .label-purple { color: var(--purple); }
 
   .point { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; }
   .point:last-child { margin-bottom: 0; }
@@ -171,10 +216,10 @@
     border-radius: 6px; display: flex; align-items: center; justify-content: center;
     font-size: 0.72rem; font-weight: 800;
   }
-  .num-red    { background: var(--red-dim);    color: #f87171; border: 1px solid #7f1d1d; }
-  .num-green  { background: var(--green-dim);  color: #4ade80; border: 1px solid #14532d; }
-  .num-purple { background: var(--purple-dim); color: var(--purple-light); border: 1px solid #4a1a8a; }
-  .point-text { font-size: 0.92rem; color: #c8c8e0; line-height: 1.65; padding-top: 3px; }
+  .num-red    { background: var(--red-dim);    color: var(--red); border: 1px solid var(--red); }
+  .num-green  { background: var(--green-dim);  color: var(--green); border: 1px solid var(--green); }
+  .num-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+  .point-text { font-size: 0.92rem; color: var(--subtle); line-height: 1.65; padding-top: 3px; }
   .point-text strong { color: var(--text); font-weight: 700; }
 
   .bottom-line {
@@ -210,24 +255,29 @@
   }
 
   .tally-wrap {
-    margin-top: 16px; padding: 24px;
+    margin-top: 16px; padding: 20px 24px;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px;
+    border-radius: 16px; display: flex; align-items: center;
+    justify-content: space-between; gap: 16px; flex-wrap: wrap;
   }
-  .tally-heading {
-    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
-    padding-bottom: 16px; border-bottom: 1px solid var(--border);
+  .tally-label { font-size: 0.88rem; color: var(--subtle); }
+  .tally-btn {
+    background: transparent; color: var(--purple-light);
+    border: 1px solid var(--purple); border-radius: 8px;
+    padding: 8px 18px; font-size: 0.85rem; font-weight: 700;
+    text-decoration: none; transition: all 0.15s; white-space: nowrap;
   }
-  .tally-icon { font-size: 1.4rem; }
-  .tally-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
-  .tally-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
+  .tally-btn:hover { background: var(--purple); color: #fff; }
 </style>
 </head>
 <body>
 
 <nav>
   <div class="nav-logo">Why<span>Not</span>?</div>
-  <div class="nav-tag">POC v0.1</div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+    <div class="nav-tag">POC v0.1</div>
+  </div>
 </nav>
 
 <section class="hero">
@@ -416,16 +466,8 @@ function renderResult(idea, r) {
       <button class="action-btn btn-secondary" onclick="resetForm()">Analyze Another Idea</button>
     </div>
     <div class="tally-wrap">
-      <div class="tally-heading">
-        <span class="tally-icon">💬</span>
-        <div>
-          <div class="tally-title">Share Your Feedback</div>
-          <div class="tally-sub">Help us make WhyNot? better for founders</div>
-        </div>
-      </div>
-      <iframe id="tallyFrame" src="https://tally.so/embed/Ek6qqo?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
-        loading="lazy" width="100%" height="280" frameborder="0" marginheight="0" marginwidth="0"
-        title="WhyNot Feedback" style="border:none;"></iframe>
+      <p class="tally-label">Help us improve — share your feedback</p>
+      <a href="https://tally.so/r/Ek6qqo" target="_blank" class="tally-btn">Give Feedback →</a>
     </div>`;
 
   wrap.style.display = 'block';
@@ -441,6 +483,32 @@ function shareResult() {
     navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
   }
 }
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const btn = document.getElementById('themeBtn');
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    btn.textContent = '🌙 Dark';
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    btn.textContent = '☀️ Light';
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+// Apply saved theme on load
+(function() {
+  const saved = localStorage.getItem('theme') || 'light';
+  if (saved === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.addEventListener('DOMContentLoaded', function() {
+      const btn = document.getElementById('themeBtn');
+      if (btn) btn.textContent = '☀️ Light';
+    });
+  }
+})();
 
 function resetForm() {
   document.getElementById('ideaInput').value = '';
