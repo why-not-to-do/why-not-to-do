@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>WhyNot? — Startup Reality Check</title>
+<title>WhyNot? — Reality Check Engine</title>
 
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BK465R4KFC"></script>
@@ -210,19 +210,17 @@
   }
 
   .tally-wrap {
-    margin-top: 16px; padding: 20px 24px;
+    margin-top: 16px; padding: 24px;
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; display: flex; align-items: center;
-    justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    border-radius: 16px;
   }
-  .tally-label { font-size: 0.88rem; color: var(--subtle); }
-  .tally-btn {
-    background: transparent; color: var(--purple-light);
-    border: 1px solid var(--purple); border-radius: 8px;
-    padding: 8px 18px; font-size: 0.85rem; font-weight: 700;
-    text-decoration: none; transition: all 0.15s; white-space: nowrap;
+  .tally-heading {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border);
   }
-  .tally-btn:hover { background: var(--purple); color: #fff; }
+  .tally-icon { font-size: 1.4rem; }
+  .tally-title { font-size: 0.95rem; font-weight: 700; color: var(--text); }
+  .tally-sub { font-size: 0.78rem; color: var(--muted); margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -233,23 +231,22 @@
 </nav>
 
 <section class="hero">
-  <div class="hero-eyebrow">Startup Reality Check</div>
-  <h1>Before you build,<br/><em>hear the truth.</em></h1>
-  <p>Describe your startup idea. We will expose every real reason it could fail — market, execution, timing, competition, and founder blind spots — before you waste months building the wrong thing.</p>
+  <div class="hero-eyebrow">Reality Check Engine</div>
+  <h1>Your idea deserves<br/><em>brutal honesty.</em></h1>
+  <p>Tell us your idea, decision, or doubt. We'll tell you exactly why it could fail — and exactly how to make it work anyway.</p>
 
   <div class="examples">
-    <div class="example-chip" onclick="fillExample('I want to build a SaaS tool for small businesses to manage invoices')">SaaS for invoicing</div>
-    <div class="example-chip" onclick="fillExample('I want to launch an AI-powered recruitment platform for Indian startups')">AI recruitment platform</div>
-    <div class="example-chip" onclick="fillExample('I want to start a D2C healthy snack brand in India')">D2C snack brand</div>
-    <div class="example-chip" onclick="fillExample('I want to build a marketplace connecting freelancers with early-stage startups')">Freelancer marketplace</div>
-    <div class="example-chip" onclick="fillExample('I want to launch a edtech platform for tier 2 and tier 3 city students in India')">EdTech for Tier 2/3</div>
-    <div class="example-chip" onclick="fillExample('I want to build a no-code tool for non-technical founders to launch MVPs')">No-code MVP builder</div>
+    <div class="example-chip" onclick="fillExample('I want to quit my job and start a food delivery startup')">Quit job → startup</div>
+    <div class="example-chip" onclick="fillExample('I want to drop out of college to become a full-time YouTuber')">Drop out → YouTube</div>
+    <div class="example-chip" onclick="fillExample('I want to invest all my savings in crypto')">All savings → crypto</div>
+    <div class="example-chip" onclick="fillExample('I want to move to a new city alone with no job lined up')">Relocate with no job</div>
+    <div class="example-chip" onclick="fillExample('I want to start a clothing brand with no experience')">Clothing brand</div>
   </div>
 </section>
 
 <div class="form-wrap">
   <div class="input-box">
-    <textarea id="ideaInput" placeholder="Describe your startup idea... Be specific: what problem are you solving, who is the customer, how do you make money? The more detail, the sharper the reality check." maxlength="800" oninput="updateChar()"></textarea>
+    <textarea id="ideaInput" placeholder="Type your idea, decision, or doubt here... Be specific. The more detail you give, the sharper the analysis." maxlength="800" oninput="updateChar()"></textarea>
     <div class="input-footer">
       <span class="char-count"><span id="charCount">0</span> / 800</span>
       <button class="submit-btn" id="submitBtn" onclick="analyze()" disabled>
@@ -271,7 +268,7 @@
 
 <div class="result-wrap" id="resultWrap"></div>
 
-<footer>WhyNot? · POC v0.1 · Built for founders who want the truth before they build</footer>
+<footer>WhyNot? · POC v0.1 · Built to validate the idea</footer>
 
 <script>
 
@@ -282,12 +279,11 @@ const PROXY_URL = "https://whynot-proxy.vercel.app/api/analyze";
 // ─────────────────────────────────────────────────────────────────────────────
 
 const loadingMessages = [
-  "Cutting through the founder optimism bias...",
-  "Stress-testing your market assumptions...",
-  "Checking if this has been tried before...",
-  "Finding the unit economics problem...",
-  "Asking the questions your investors will...",
-  "No sugarcoating in progress..."
+  "Cutting through the optimism bias...",
+  "Finding the real risks you haven't thought of...",
+  "Building your reality check...",
+  "No sugarcoating in progress...",
+  "Stress-testing your thinking..."
 ];
 
 function updateChar() {
@@ -320,27 +316,25 @@ function setLoading(on) {
   }
 }
 
-const systemPrompt = `You are WhyNot? — a brutally honest startup reality-check engine built for founders. You do not coddle people. You respect them enough to tell the hard truth before they waste months or money.
+const systemPrompt = `You are WhyNot? — a brutally honest, direct reality-check engine. You do not coddle people. You respect them enough to tell the truth.
 
-Your job: when a founder describes their startup idea, expose every real reason it could fail. Cover blind spots across market, competition, execution, timing, unit economics, distribution, and founder-market fit. Be specific to their exact idea — not generic startup advice.
+Your job: when someone gives you an idea, decision, or doubt, give them the REAL reasons why it could fail or why they should not do it. Not generic warnings. Specific, insightful, hard-hitting truths they have not considered.
 
 Respond ONLY in this exact JSON format, nothing else:
 {
   "verdict": "RISKY" or "POSSIBLE" or "SOLID",
   "verdict_reason": "One sharp sentence explaining the verdict",
   "why_nots": [
-    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation of this specific startup risk or failure mode"},
-    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
-    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
+    {"title": "Short title", "detail": "2-3 sentence brutal honest explanation of this specific risk"},
     {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
     {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
     {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"},
     {"title": "Short title", "detail": "2-3 sentence brutal honest explanation"}
   ],
-  "bottom_line": "2-3 sentences. Brutally honest verdict on this startup idea. What is the core issue they must solve before this has any shot? Be direct, not diplomatic."
+  "bottom_line": "2-3 sentences. Brutally honest summary. Be direct, not diplomatic."
 }
 
-Rules: Give exactly 7 why_nots covering different dimensions (market size, competition, monetization, distribution, timing, execution risk, founder fit). Be hyper-specific to their idea. No fluff. No silver linings. No motivation.
+Rules: Give exactly 5 why_nots. Be specific to their exact idea. No fluff. No silver linings.
 CRITICAL: Return ONLY the raw JSON object. No markdown, no code fences, no text before or after. Never use apostrophes inside string values, rephrase to avoid them.`;
 
 async function analyze() {
@@ -411,7 +405,7 @@ function renderResult(idea, r) {
       <div class="verdict-badge ${badgeClass}">${badgeText}</div>
     </div>
     <div class="section-card">
-      <div class="section-label label-red">🚫 Why This Startup Could Fail</div>
+      <div class="section-label label-red">🚫 Why Not — The Real Problems</div>
       ${whyNotsHTML}
     </div>
     <div class="bottom-line">
@@ -422,8 +416,17 @@ function renderResult(idea, r) {
       <button class="action-btn btn-secondary" onclick="resetForm()">Analyze Another Idea</button>
     </div>
     <div class="tally-wrap">
-      <p class="tally-label">Help us improve — share your feedback</p>
-      <a href="https://tally.so/r/Ek6qqo" target="_blank" class="tally-btn">Give Feedback →</a>
+      <div class="tally-heading">
+        <span class="tally-icon">💬</span>
+        <div>
+          <div class="tally-title">Share Your Feedback</div>
+          <div class="tally-sub">Help us make WhyNot? better for founders</div>
+        </div>
+      </div>
+      <iframe data-tally-src="https://tally.so/embed/Ek6qqo?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1"
+        loading="lazy" width="100%" height="280" frameborder="0" marginheight="0" marginwidth="0"
+        title="WhyNot Feedback" style="border:none;"></iframe>
+      <script>var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};if("undefined"!=typeof Tally)v();else if(d.querySelector('script[src="'+w+'"]')==null){var s=d.createElement("script");s.src=w;s.onload=v;s.onerror=v;d.body.appendChild(s);}</script>
     </div>`;
 
   wrap.style.display = 'block';
@@ -432,7 +435,7 @@ function renderResult(idea, r) {
 
 function shareResult() {
   const idea = document.getElementById('ideaInput').value.trim();
-  const text = `Got a brutal startup reality check from WhyNot?\n\nMy idea: "${idea}"\n\nTest your startup idea at WhyNot? — no sugarcoating.`;
+  const text = `Got a brutal reality check on my idea from WhyNot?\n\nMy idea: "${idea}"\n\nCheck yours at WhyNot?`;
   if (navigator.share) {
     navigator.share({ title: 'WhyNot? Analysis', text });
   } else {
