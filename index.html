@@ -5,6 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>WhyNot? — Startup Reality Check</title>
 
+<!-- Pendo -->
+<script>
+(function(apiKey){
+    (function(p,e,n,d,o){var v,w,x,y,z;o=p[d]=p[d]||{};o._q=o._q||[];
+    v=['initialize','identify','updateOptions','pageLoad','track', 'trackAgent'];for(w=0,x=v.length;w<x;++w)(function(m){
+    o[m]=o[m]||function(){o._q[m===v[0]?'unshift':'push']([m].concat([].slice.call(arguments,0)));};})(v[w]);
+    y=e.createElement(n);y.async=!0;y.src='https://cdn.pendo.io/agent/static/'+apiKey+'/pendo.js';
+    z=e.getElementsByTagName(n)[0];z.parentNode.insertBefore(y,z);})(window,document,'script','pendo');
+})('e5d07946-3cb7-451c-8274-c547a4f831f7');
+</script>
+
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-BK465R4KFC"></script>
 <script>
@@ -324,6 +335,13 @@
 <footer>WhyNot? · POC v0.1 · Built for founders who want the truth before they build</footer>
 
 <script>
+
+// Initialize Pendo with anonymous visitor
+pendo.initialize({
+  visitor: {
+    id: ''
+  }
+});
 
 // ─── IMPORTANT ───────────────────────────────────────────────────────────────
 // Replace the URL below with your Vercel proxy URL once deployed.
