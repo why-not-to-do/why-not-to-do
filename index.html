@@ -349,6 +349,8 @@ pendo.initialize({
 const PROXY_URL = "https://whynot-proxy.vercel.app/api/analyze";
 // ─────────────────────────────────────────────────────────────────────────────
 
+let sessionAnalysisCount = 0;
+
 const loadingMessages = [
   "Cutting through the founder optimism bias...",
   "Stress-testing your market assumptions...",
@@ -369,6 +371,26 @@ function fillExample(text) {
   ta.value = text;
   updateChar();
   ta.focus();
+
+  // Pendo Track: example_idea_selected
+  if (typeof pendo !== 'undefined') {
+    const categories = {
+      'invoice': 'SaaS',
+      'AI-powered recruitment': 'AI',
+      'D2C healthy snack': 'D2C',
+      'marketplace connecting freelancers': 'marketplace',
+      'edtech platform': 'edtech',
+      'no-code tool': 'no-code'
+    };
+    let category = 'other';
+    for (const [key, val] of Object.entries(categories)) {
+      if (text.toLowerCase().includes(key.toLowerCase())) { category = val; break; }
+    }
+    pendo.track("example_idea_selected", {
+      example_text: text.substring(0, 100),
+      example_category: category
+    });
+  }
 }
 
 let loadingInterval;
@@ -424,6 +446,24 @@ async function analyze() {
     gtag('event', 'analyze_clicked', { idea_length: idea.length });
   }
 
+  // Pendo Track: idea_submitted
+  const analyzeStartTime = Date.now();
+  if (typeof pendo !== 'undefined') {
+    const exampleTexts = [
+      'I want to build a SaaS tool for small businesses to manage invoices',
+      'I want to launch an AI-powered recruitment platform for Indian startups',
+      'I want to start a D2C healthy snack brand in India',
+      'I want to build a marketplace connecting freelancers with early-stage startups',
+      'I want to launch an edtech platform for tier 2 and tier 3 city students in India',
+      'I want to build a no-code tool for non-technical founders to launch MVPs'
+    ];
+    pendo.track("idea_submitted", {
+      idea_length: idea.length,
+      idea_text_preview: idea.substring(0, 80),
+      is_example_idea: exampleTexts.includes(idea)
+    });
+  }
+
   try {
     const response = await fetch(PROXY_URL, {
       method: "POST",
@@ -451,11 +491,31 @@ async function analyze() {
     const result = JSON.parse(clean);
     renderResult(idea, result);
 
+    // Pendo Track: analysis_completed
+    sessionAnalysisCount++;
+    if (typeof pendo !== 'undefined') {
+      pendo.track("analysis_completed", {
+        verdict: result.verdict,
+        why_nots_count: Array.isArray(result.why_nots) ? result.why_nots.length : 0,
+        idea_length: idea.length,
+        response_time_ms: Date.now() - analyzeStartTime
+      });
+    }
+
   } catch (err) {
     setLoading(false);
     const errEl = document.getElementById('errorCard');
     errEl.textContent = "Something went wrong: " + err.message + ". Try again in a moment.";
     errEl.style.display = 'block';
+
+    // Pendo Track: analysis_failed
+    if (typeof pendo !== 'undefined') {
+      pendo.track("analysis_failed", {
+        error_message: (err.message || '').substring(0, 100),
+        idea_length: idea.length,
+        error_type: err.name || 'Error'
+      });
+    }
   }
 }
 
@@ -510,13 +570,42 @@ function shareResult() {
   const idea = document.getElementById('ideaInput').value.trim();
   const text = `Got a brutal startup reality check from WhyNot?\n\nMy idea: "${idea}"\n\nCheck yours at WhyNot?`;
   if (navigator.share) {
-    navigator.share({ title: 'WhyNot? Analysis', text });
+    navigator.share({ title: 'WhyNot? Analysis', text }).then(() => {
+      // Pendo Track: result_shared (Web Share API)
+      if (typeof pendo !== 'undefined') {
+        pendo.track("result_shared", {
+          share_method: "web_share_api",
+          idea_length: idea.length,
+          idea_text_preview: idea.substring(0, 80)
+        });
+      }
+    }).catch(() => {}); // user cancelled share
   } else {
-    navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard!'));
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Copied to clipboard!');
+      // Pendo Track: result_shared (clipboard)
+      if (typeof pendo !== 'undefined') {
+        pendo.track("result_shared", {
+          share_method: "clipboard_copy",
+          idea_length: idea.length,
+          idea_text_preview: idea.substring(0, 80)
+        });
+      }
+    });
   }
 }
 
 function resetForm() {
+  const previousIdea = document.getElementById('ideaInput').value.trim();
+
+  // Pendo Track: repeat_analysis_started
+  if (typeof pendo !== 'undefined') {
+    pendo.track("repeat_analysis_started", {
+      previous_idea_length: previousIdea.length,
+      session_analysis_count: sessionAnalysisCount
+    });
+  }
+
   document.getElementById('ideaInput').value = '';
   document.getElementById('charCount').textContent = '0';
   document.getElementById('submitBtn').disabled = true;
