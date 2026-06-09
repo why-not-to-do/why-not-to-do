@@ -331,6 +331,12 @@
 const PROXY_URL = "https://whynot-proxy.vercel.app/api/analyze";
 // ─────────────────────────────────────────────────────────────────────────────
 
+// ─── Pendo trackAgent helpers ────────────────────────────────────────────────
+const PENDO_AGENT_ID = "SS_PMwjlFH9xJilnoD9OD2ieNYY";
+const pendoConversationId = crypto.randomUUID();
+let lastPromptMessageId = null;
+let usedSuggestedPrompt = false;
+
 const loadingMessages = [
   "Cutting through the founder optimism bias...",
   "Stress-testing your market assumptions...",
@@ -349,6 +355,7 @@ function updateChar() {
 function fillExample(text) {
   const ta = document.getElementById('ideaInput');
   ta.value = text;
+  usedSuggestedPrompt = true;
   updateChar();
   ta.focus();
 }
@@ -406,6 +413,19 @@ async function analyze() {
     gtag('event', 'analyze_clicked', { idea_length: idea.length });
   }
 
+  // Pendo: track user prompt
+  lastPromptMessageId = crypto.randomUUID();
+  if (typeof pendo !== 'undefined' && pendo.trackAgent) {
+    pendo.trackAgent("prompt", {
+      agentId: PENDO_AGENT_ID,
+      conversationId: pendoConversationId,
+      messageId: lastPromptMessageId,
+      content: idea,
+      suggestedPrompt: usedSuggestedPrompt
+    });
+  }
+  usedSuggestedPrompt = false;
+
   try {
     const response = await fetch(PROXY_URL, {
       method: "POST",
@@ -431,6 +451,18 @@ async function analyze() {
       .replace(/[\x00-\x09\x0b\x0c\x0e-\x1f]/g, ' ');
 
     const result = JSON.parse(clean);
+
+    // Pendo: track agent response
+    if (typeof pendo !== 'undefined' && pendo.trackAgent) {
+      pendo.trackAgent("agent_response", {
+        agentId: PENDO_AGENT_ID,
+        conversationId: pendoConversationId,
+        messageId: crypto.randomUUID(),
+        content: clean,
+        modelUsed: "llama-3.3-70b-versatile"
+      });
+    }
+
     renderResult(idea, result);
 
   } catch (err) {
